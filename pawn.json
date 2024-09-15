@@ -1,0 +1,17 @@
+{
+	"user": "1asa9na",
+	"repo": "rtd",
+	"entry": "gamemodes\\rtd.pwn",
+	"output": "gamemodes/gamemodes\\rtd.amx",
+	"dependencies": [
+		"pawn-lang/samp-stdlib",
+		"pawn-lang/YSI-Includes@5.x"
+	],
+	"local": true,
+	"runtime": {
+		"version": "0.3.7",
+		"mode": "server",
+		"rcon_password": "password",
+		"port": 7777
+	}
+}

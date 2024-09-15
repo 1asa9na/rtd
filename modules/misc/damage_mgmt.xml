@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<?xml-stylesheet href="file:///C|/develop/openmp/Server/qawno/xml/pawndoc.xsl" type="text/xsl"?>
+<doc source="C:\develop\openmp\Server\modules\misc\damage_mgmt.pwn">
+	<assembly>
+		<name>damage_mgmt.pwn</name>
+	</assembly>
+	<members>
+
+		<!-- enumerations -->
+		<member name="T:EPlayerLastDamagerInfo" value="2">
+			<tagname value="EPlayerLastDamagerInfo"/>
+			<member name="C:player_last_damagerid" value="0">
+			</member>
+			<member name="C:player_last_damagerid_weapon" value="1">
+			</member>
+		</member>
+
+		<!-- constants -->
+
+		<!-- variables -->
+		<member name="F:PlayerLastDamagerInfo">
+			<referrer name="SetPlayerLastDamager"/>
+			<referrer name="GetPlayerLastDamager"/>
+		</member>
+		<member name="F:__date">
+		</member>
+		<member name="F:__file">
+		</member>
+		<member name="F:__time">
+		</member>
+
+		<!-- functions -->
+		<member name="M:GetPlayerLastDamager" syntax="GetPlayerLastDamager(playerid, &amp;issuerid, &amp;weapon)">
+			<stacksize value="1"/>
+			<dependency name="PlayerLastDamagerInfo"/>
+			<dependency name="player_last_damagerid"/>
+			<dependency name="player_last_damagerid_weapon"/>
+			<param name="playerid">
+			</param>
+			<param name="issuerid">
+				<paraminfo> &amp; </paraminfo>
+			</param>
+			<param name="weapon">
+				<paraminfo> &amp; </paraminfo>
+			</param>
+		</member>
+		<member name="M:SetPlayerLastDamager" syntax="SetPlayerLastDamager(playerid, issuerid, weapon)">
+			<stacksize value="1"/>
+			<dependency name="PlayerLastDamagerInfo"/>
+			<dependency name="PlayerLastDamagerInfo"/>
+			<dependency name="player_last_damagerid"/>
+			<dependency name="player_last_damagerid_weapon"/>
+			<param name="playerid">
+			</param>
+			<param name="issuerid">
+			</param>
+			<param name="weapon">
+			</param>
+		</member>
+
+	</members>
+</doc>
