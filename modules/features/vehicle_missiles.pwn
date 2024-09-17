@@ -1,6 +1,3 @@
-#include <a_samp>
-#include <ColAndreas>
-#include <streamer>
 #include <YSI_Coding\y_hooks>
 
 #define MAX_MISSILES 50
@@ -19,15 +16,6 @@
 // COOLDOWNS
 
 new bool:RustlerCooldown[MAX_PLAYERS];
-
-// PLAYERS INFO
-
-enum EPlayerInfo {
-	bool:player_stinger,
-	player_stinger_missile,
-}
-
-new PlayerInfo[MAX_PLAYERS][EPlayerInfo];
 
 // VEHICLES INFO 
 
@@ -58,7 +46,7 @@ enum EWMInfo {
 
 new WMInfo[MAX_MISSILES][EWMInfo];
 
-public OnFilterScriptInit()
+hook OnGameModeInit()
 {
 	for(new i=0; i < MAX_MISSILES; i++)
 	{
@@ -203,40 +191,20 @@ public OnFilterScriptInit()
 	}
 }
 
-@hook OnFilterScriptExit()
-{
-	return 1;
-}
-
-@hook OnPlayerConnect(playerid)
+hook OnPlayerConnect(playerid)
 {
 	RustlerCooldown[playerid] = false;
 	return 1;
 }
 
-@hook OnPlayerDisconnect(playerid, reason)
-{
-	return 1;
-}
-
-@hook OnPlayerRequestClass(playerid, classid)
-{
-	return 1;
-}
-
-@hook OnPlayerSpawn(playerid)
+hook OnPlayerSpawn(playerid)
 {
 	SetPlayerLastDamager(playerid, INVALID_PLAYER_ID, 47);
 	PlayerInfo[playerid][player_stinger] = false;
 	return 1;
 }
 
-@hook OnPlayerDeath(playerid, killerid, reason)
-{
-	return 1;
-}
-
-@hook OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
+hook OnPlayerEnterVehicle(playerid, vehicleid, ispassenger)
 {
 	if(GetVehicleModel(vehicleid) == 423 && ispassenger == 0) {
 		EnablePlayerCameraTarget(playerid, true);
@@ -244,7 +212,7 @@ public OnFilterScriptInit()
 	return 0;
 }
 
-@hook OnPlayerExitVehicle(playerid, vehicleid)
+hook OnPlayerExitVehicle(playerid, vehicleid)
 {
 	if(GetVehicleModel(vehicleid) == 535) {
 		PlayerInfo[playerid][player_stinger] = false;
@@ -252,47 +220,7 @@ public OnFilterScriptInit()
 	return 0;
 }
 
-@hook OnVehicleSpawn(vehicleid)
-{
-	return 1;
-}
-
-@hook OnVehicleDeath(vehicleid, killerid)
-{
-	return 1;
-}
-
-@hook OnGameModeInit()
-{
-	return 1;
-}
-
-@hook OnGameModeExit()
-{
-	return 1;
-}
-
-@hook OnPlayerRequestSpawn(playerid)
-{
-	return 1;
-}
-
-@hook OnPlayerCommandText(playerid, cmdtext[])
-{
-	return 0;
-}
-
-@hook OnPlayerText(playerid, text[])
-{
-	return 1;
-}
-
-@hook OnPlayerUpdate(playerid)
-{
-	return 1;
-}
-
-@hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
+hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 {
 	// called on shooting
 	if((newkeys & KEY_FIRE) && !(oldkeys & KEY_FIRE)) {
@@ -307,7 +235,7 @@ public OnFilterScriptInit()
 					// rustler rotation matrix
 			        new
 					Float:rightX, Float:rightY, Float:rightZ,
-					Float:upX, Float:upY, Float:upZ;
+					Float:atX, Float:atY, Float:atZ;
 					// change missile velocity
 					new missile_velocity = 100;
 
@@ -319,9 +247,9 @@ public OnFilterScriptInit()
 					rightY = 2 * (rx*ry - rw*rz);
 					rightZ = 2 * (rx*rz + rw*ry);
 
-					upZ = 2 * (rw*rw + rz*rz) - 1;
-					upX = 2 * (rz*rx - rw*ry);
-					upY = 2 * (rz*ry + rw*rx);
+					atX = 2 * (ry*rx + rw*rz);
+					atY = 2 * (rw*rw + ry*ry) - 1;
+					atZ = 2 * (ry*rz - rw*rx);
 					
 					new Float:distance = 300.0;			
 					
@@ -330,21 +258,21 @@ public OnFilterScriptInit()
 						Float:dflX, Float:dflY, Float:dflZ,
 						Float:dfrX, Float:dfrY, Float:dfrZ;	
 					// origin coords of left missile
-					flX = fX + upX * 5 - rightX * 2;
-					flY = fY + upY * 5 - rightY * 2;
-					flZ = fZ + upZ * 5 - rightZ * 2;
+					flX = fX + atX * 5 - rightX * 2;
+					flY = fY + atY * 5 - rightY * 2;
+					flZ = fZ + atZ * 5 - rightZ * 2;
 					// destination coords of left missile
-					dflX = fX + upX * distance - rightX * 2;
-					dflY = fY + upY * distance - rightY * 2;
-					dflZ = fZ + upZ * distance - rightZ * 2;
+					dflX = fX + atX * distance - rightX * 2;
+					dflY = fY + atY * distance - rightY * 2;
+					dflZ = fZ + atZ * distance - rightZ * 2;
 					// origin coords of right missile
-					frX = fX + upX * 5 + rightX * 2;
-					frY = fY + upY * 5 + rightY * 2;
-					frZ = fZ + upZ * 5 + rightZ * 2;
+					frX = fX + atX * 5 + rightX * 2;
+					frY = fY + atY * 5 + rightY * 2;
+					frZ = fZ + atZ * 5 + rightZ * 2;
 					// destination coords of right missile
-					dfrX = fX + upX * distance + rightX * 2;
-					dfrY = fY + upY * distance + rightY * 2;
-					dfrZ = fZ + upZ * distance + rightZ * 2;
+					dfrX = fX + atX * distance + rightX * 2;
+					dfrY = fY + atY * distance + rightY * 2;
+					dfrZ = fZ + atZ * distance + rightZ * 2;
 					// create objects
 					new Float:temp_X, Float:temp_Y, Float:temp_Z;
 					new l_obstacle = CA_RayCastLine(flX, flY, flZ, dflX, dflY, dflZ, temp_X, temp_Y, temp_Z);
@@ -395,13 +323,13 @@ public OnFilterScriptInit()
 }
 
 forward ReleaseRustlerCooldown(playerid);
-@hook ReleaseRustlerCooldown(playerid)
+hook ReleaseRustlerCooldown(playerid)
 {
 	RustlerCooldown[playerid] = false;
 }
 
 forward DestroyDeagleObject(playerid, objectid);
-@hook DestroyDeagleObject(playerid, objectid)
+hook DestroyDeagleObject(playerid, objectid)
 {
 	new Float:fX, Float:fY, Float:fZ;
 	GetObjectPos(objectid, fX, fY, fZ);
@@ -409,137 +337,7 @@ forward DestroyDeagleObject(playerid, objectid);
 	CreateCustomExplosion(playerid, fX, fY, fZ, 0, MISSILE_EXPLOSION_RADIUS);
 }
 
-@hook OnPlayerStateChange(playerid, newstate, oldstate)
-{
-	return 1;
-}
-
-@hook OnPlayerEnterCheckpoint(playerid)
-{
-	return 1;
-}
-
-@hook OnPlayerLeaveCheckpoint(playerid)
-{
-	return 1;
-}
-
-@hook OnPlayerEnterRaceCheckpoint(playerid)
-{
-	return 1;
-}
-
-@hook OnPlayerLeaveRaceCheckpoint(playerid)
-{
-	return 1;
-}
-
-@hook OnPlayerGiveDamageActor(playerid, damaged_actorid, Float:amount, weaponid, bodypart)
-{
-	return 1;
-}
-
-@hook OnActorStreamIn(actorid, forplayerid)
-{
-	return 1;
-}
-
-@hook OnActorStreamOut(actorid, forplayerid)
-{
-	return 1;
-}
-
-@hook OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
-{
-	return 1;
-}
-
-@hook OnPlayerSelectedMenuRow(playerid, row)
-{
-	return 1;
-}
-
-@hook OnPlayerExitedMenu(playerid)
-{
-	return 1;
-}
-
-@hook OnClientCheckResponse(playerid, actionid, memaddr, retndata)
-{
-	return 1;
-}
-
-@hook OnRconLoginAttempt(ip[], password[], success)
-{
-	return 1;
-}
-
-@hook OnPlayerFinishedDownloading(playerid, virtualworld)
-{
-	return 1;
-}
-
-@hook OnPlayerRequestDownload(playerid, type, crc)
-{
-	return 1;
-}
-
-@hook OnRconCommand(cmd[])
-{
-	return 0;
-}
-
-@hook OnPlayerSelectObject(playerid, type, objectid, modelid, Float:fX, Float:fY, Float:fZ)
-{
-	return 1;
-}
-
-@hook OnPlayerEditObject(playerid, playerobject, objectid, response, Float:fX, Float:fY, Float:fZ, Float:fRotX, Float:fRotY, Float:fRotZ)
-{
-	return 1;
-}
-
-@hook OnPlayerEditAttachedObject(playerid, response, index, modelid, boneid, Float:fOffsetX, Float:fOffsetY, Float:fOffsetZ, Float:fRotX, Float:fRotY, Float:fRotZ, Float:fScaleX, Float:fScaleY, Float:fScaleZ)
-{
-	return 1;
-}
-
-@hook OnObjectMoved(objectid)
-{
-	return 1;
-}
-
-@hook OnPlayerObjectMoved(playerid, objectid)
-{
-	return 1;
-}
-
-@hook OnPlayerPickUpPickup(playerid, pickupid)
-{
-	return 1;
-}
-
-@hook OnPlayerStreamIn(playerid, forplayerid)
-{
-	return 1;
-}
-
-@hook OnPlayerStreamOut(playerid, forplayerid)
-{
-	return 1;
-}
-
-@hook OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
-{
-	return 1;
-}
-
-@hook OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
-{
-	return 1;
-}
-
-@hook OnPlayerClickPlayer(playerid, clickedplayerid, source)
+hook OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
 	new vehicleid = GetPlayerVehicleID(playerid);
 	switch(GetVehicleModel(vehicleid)) {
@@ -572,6 +370,7 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 	WMInfo[missileid][wm_targetid] = victimid;
 	WMInfo[missileid][wm_objectid] = objectid;
 	WMInfo[missileid][wm_type] = type;
+	WMInfo[missileid][wm_faced_obstacle] = false;
 
 	MoveDynamicObject(objectid, dX, dY, dZ, MISSILE_VELOCITY, 0, 0, 0);
 	SendClientMessage(playerid, PASTEL_DEEP_ORANGE, "Missile Launched!");
@@ -579,17 +378,20 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 	return missileid;
 }
 
-@hook OnDynamicObjectMoved(objectid)
+hook OnDynamicObjectMoved(objectid)
 {
 	new missileid = Streamer_GetIntData(STREAMER_TYPE_OBJECT, objectid, E_STREAMER_EXTRA_ID) - MISSILE_EX_ID_OFFSET;
 	new target_state = GetPlayerState(WMInfo[missileid][wm_targetid]);
-	if(target_state != 7 && target_state != 9) {
+	if(target_state != 7 && target_state != 9 && WMInfo[missileid][wm_faced_obstacle] == false) {
 		switch(WMInfo[missileid][wm_type]) {
 			case 1: MoveCheckpointMissile(missileid);
 			case 2: MoveStepMissile(missileid);
 			case 3: MoveStingerMissile(missileid);
 		}
 	} else {
+		switch(WMInfo[missileid][wm_type]) {
+			case 3: SetCameraBehindPlayer(WMInfo[missileid][wm_playerid]);
+		}
 		DestroyMissile(missileid);
 	}
 }
@@ -605,6 +407,15 @@ stock MoveCheckpointMissile(missileid)
 	{
 		DestroyMissile(missileid);
 		return 1;
+	}
+	new Float:tX, Float:tY, Float:tZ;
+	new obstacle = CA_RayCastLine(oX, Float:oY, Float:oZ, Float:dX, Float:dY, Float:dZ, Float:tX, Float:tY, Float:tZ);
+	if(obstacle != 0)
+	{
+		dX = tX;
+		dY = tY;
+		dZ = tZ;
+		WMInfo[missileid][wm_faced_obstacle] = true;
 	}
 	MoveDynamicObject(WMInfo[missileid][wm_objectid], dX, dY, dZ, MISSILE_VELOCITY, 0, 0, 0);
 	return 0;
@@ -634,6 +445,16 @@ stock MoveStepMissile(missileid)
 	dX = oX + sX;
 	dY = oY + sY;
 	dZ = oZ + sZ;
+
+	new Float:tX, Float:tY, Float:tZ;
+	new obstacle = CA_RayCastLine(oX, Float:oY, Float:oZ, Float:dX, Float:dY, Float:dZ, Float:tX, Float:tY, Float:tZ);
+	if(obstacle != 0)
+	{
+		dX = tX;
+		dY = tY;
+		dZ = tZ;
+		WMInfo[missileid][wm_faced_obstacle] = true;
+	}
 	
 	MoveDynamicObject(WMInfo[missileid][wm_objectid], dX, dY, dZ, MISSILE_VELOCITY, 0, 0, 0);
 	return 0;
@@ -641,8 +462,7 @@ stock MoveStepMissile(missileid)
 
 stock MoveStingerMissile(missileid)
 {
-	new target_state = GetPlayerState(WMInfo[missileid][wm_targetid]);
-	if(target_state != 7 && target_state != 9 && PlayerInfo[WMInfo[missileid][wm_playerid]][player_stinger])
+	if(PlayerInfo[WMInfo[missileid][wm_playerid]][player_stinger])
 	{
 		new Float:oX, Float:oY, Float:oZ,
 			Float:dX, Float:dY, Float:dZ,
@@ -652,12 +472,22 @@ stock MoveStingerMissile(missileid)
 		dX = oX + nX * MISSILE_STINGER_STEP;
 		dY = oY + nY * MISSILE_STINGER_STEP;
 		dZ = oZ + nZ * MISSILE_STINGER_STEP;
+		new Float:tX, Float:tY, Float:tZ;
+		new obstacle = CA_RayCastLine(oX, Float:oY, Float:oZ, Float:dX, Float:dY, Float:dZ, Float:tX, Float:tY, Float:tZ);
+		if(obstacle != 0)
+		{
+			dX = tX;
+			dY = tY;
+			dZ = tZ;
+			WMInfo[missileid][wm_faced_obstacle] = true;
+		}
 		MoveDynamicObject(WMInfo[missileid][wm_objectid], dX, dY, dZ, MISSILE_STINGER_VELOCITY, 0, 0, 0);
 		return 0;
 	} else
 	{
 		DestroyMissile(missileid);
 		PlayerInfo[WMInfo[missileid][wm_playerid]][player_stinger] = false;
+		SetCameraBehindPlayer(WMInfo[missileid][wm_playerid]);
 		return 1;
 	}
 }
@@ -681,89 +511,4 @@ stock FindEmptyMissileSlot()
     }
     if (i == MAX_MISSILES) return -1;
     return i;
-}
-
-@hook OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)
-{
-	return 1;
-}
-
-@hook OnScriptCash(playerid, amount, source)
-{
-	return 1;
-}
-
-@hook OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
-{
-	return 1;
-}
-
-@hook OnIncomingConnection(playerid, ip_address[], port)
-{
-	return 1;
-}
-
-@hook OnPlayerInteriorChange(playerid, newinteriorid, oldinteriorid)
-{
-	return 1;
-}
-
-@hook OnPlayerClickTextDraw(playerid, Text:clickedid)
-{
-	return 1;
-}
-
-@hook OnPlayerClickPlayerTextDraw(playerid, PlayerText:playertextid)
-{
-	return 1;
-}
-
-@hook OnTrailerUpdate(playerid, vehicleid)
-{
-	return 1;
-}
-
-@hook OnVehicleSirenStateChange(playerid, vehicleid, newstate)
-{
-	return 1;
-}
-
-@hook OnVehicleStreamIn(vehicleid, forplayerid)
-{
-	return 1;
-}
-
-@hook OnVehicleStreamOut(vehicleid, forplayerid)
-{
-	return 1;
-}
-
-@hook OnVehicleMod(playerid, vehicleid, componentid)
-{
-	return 1;
-}
-
-@hook OnEnterExitModShop(playerid, enterexit, interiorid)
-{
-	return 1;
-}
-
-@hook OnVehiclePaintjob(playerid, vehicleid, paintjobid)
-{
-	return 1;
-}
-
-@hook OnVehicleRespray(playerid, vehicleid, color1, color2)
-{
-	return 1;
-}
-
-@hook OnVehicleDamageStatusUpdate(vehicleid, playerid)
-{
-	return 1;
-}
-
-@hook OnUnoccupiedVehicleUpdate(vehicleid, playerid, passenger_seat, Float:new_x, Float:new_y, Float:new_z, Float:vel_x, Float:vel_y, Float:vel_z)
-{
-	return 1;
 }
