@@ -132,6 +132,20 @@ stock RemovePlayerDrunk(hitid)
 	SetPlayerDrunkLevel(hitid, 0);
 }
 
+hook OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
+{
+	new Float:pX, Float:pY, Float:pZ;
+	GetPlayerPos(playerid, pX, pY, pZ);
+	PlayerPlaySound(playerid, 17802, Float:pX, Float:pY, Float:pZ);
+}
+
+hook OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
+{
+	new Float:pX, Float:pY, Float:pZ;
+	GetPlayerPos(playerid, pX, pY, pZ);
+	PlayerPlaySound(playerid, 4600, Float:pX, Float:pY, Float:pZ);
+}
+
 hook OnGameModeInit()
 {
 	print("MODULE WEAPONS LOADED");

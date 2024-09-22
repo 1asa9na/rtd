@@ -1,7 +1,6 @@
 {
 	"user": "1asa9na",
 	"repo": "rtd",
-	"tag": "0.0.1",
 	"entry": "gamemodes\\rtd.pwn",
 	"output": "gamemodes\\rtd.amx",
 	"dependencies": [
@@ -10,9 +9,10 @@
 		"pawn-lang/YSI-Includes@5.x",
 		"katursis/Pawn.CMD:3.4.0",
 		"Pottus/ColAndreas:1.5.0",
-		"udan11/samp-plugin-timerfix:v1.5",
 		"Y-less/sscanf:v2.13.8",
-		"samp-incognito/samp-streamer-plugin:v2.9.6"
+		"samp-incognito/samp-streamer-plugin:v2.9.6",
+		"kurta999/YSF@master",
+		"pBlueG/SA-MP-MySQL:R41"
 	],
 	"local": true,
 	"runtime": {

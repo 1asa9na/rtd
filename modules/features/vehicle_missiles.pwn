@@ -309,6 +309,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 				{
 					PlayerInfo[playerid][player_stinger] = true;
 					new missileid = LaunchPlayerMissile(playerid, playerid, 3);
+					if(missileid == -1) return 1;
 					AttachCameraToDynamicObject(playerid, WMInfo[missileid][wm_objectid]);
 				} else
 				{
@@ -362,6 +363,11 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 	}
 	
 	new missileid = FindEmptyMissileSlot();
+	if(missileid == -1)
+	{
+		SendClientMessage(playerid, PASTEL_DEEP_ORANGE, "Missiles overflow!");
+		return -1;
+	}
 	new objectid = CreateDynamicObject(345, oX, oY, oZ, 0, 0, 0);
 	
 	Streamer_SetIntData(STREAMER_TYPE_OBJECT, objectid, E_STREAMER_EXTRA_ID, missileid + MISSILE_EX_ID_OFFSET);
@@ -381,6 +387,7 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 hook OnDynamicObjectMoved(objectid)
 {
 	new missileid = Streamer_GetIntData(STREAMER_TYPE_OBJECT, objectid, E_STREAMER_EXTRA_ID) - MISSILE_EX_ID_OFFSET;
+	if(0 > missileid || missileid >= MAX_MISSILES) return 1;
 	new target_state = GetPlayerState(WMInfo[missileid][wm_targetid]);
 	if(target_state != 7 && target_state != 9 && WMInfo[missileid][wm_faced_obstacle] == false) {
 		switch(WMInfo[missileid][wm_type]) {
@@ -394,6 +401,7 @@ hook OnDynamicObjectMoved(objectid)
 		}
 		DestroyMissile(missileid);
 	}
+	return 0;
 }
 
 stock MoveCheckpointMissile(missileid)

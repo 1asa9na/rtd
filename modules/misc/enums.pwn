@@ -1,10 +1,16 @@
 #define N_CLASSES 2
 #define N_PICKUPS 1
-#define N_CPS 3
+
+#define BOMB_CP_EX_ID_OFFSET 200001
+#define N_BOMB_CPS 2
 #define N_PERKS 4
 #define MAX_PERK_NAME 10
 
-#define SKILL_KING_CHARGES_EX_ID_OFFSET 400001
+#define MAX_KING_CHARGES 10
+#define SKILL_ROOK_TOWERS_EX_ID_OFFSET 400001
+
+#define N_ZONES 31
+#define ZONE_CP_EX_ID_OFFSET 500001
 
 // CLASS INFO
 
@@ -40,9 +46,18 @@ new PlayerInfo[MAX_PLAYERS][EPlayerInfo];
 
 // ROOK TOWER INFO
 
+enum ESkillKingChargeInfo {
+	skc_objectid[MAX_KING_CHARGES],
+	skc_amount
+}
+
+new SkillKingChargeInfo[MAX_PLAYERS][ESkillKingChargeInfo];
+
 enum ESkillRookTowerInfo {
 	srt_objectid,
 	srt_areaid,
+	srt_targetid,
+	srt_particleid,
 	srt_timerid,
 	bool:srt_is_created
 }
@@ -91,4 +106,26 @@ enum ECPInfo {
 	bool:is_active
 }
 
-new CPInfo[N_CPS][ECPInfo];
+new CPInfo[N_BOMB_CPS][ECPInfo];
+
+// ZONE INFO
+
+enum EZoneInfo {
+	z_name[24],
+	Float:z_minx,
+	Float:z_miny,
+	Float:z_maxx,
+	Float:z_maxy,
+	z_team,
+	z_cp,
+	bool:z_is_active,
+	Float: z_cp_x,
+	Float: z_cp_y,
+	Float: z_cp_z,
+	z_progress,
+	z_timer,
+	z_attacker,
+	Text:z_textdraw
+}
+
+new ZoneInfo[N_ZONES][EZoneInfo];
