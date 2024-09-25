@@ -50,7 +50,7 @@ hook OnPlayerDeath(playerid, killerid, reason)
 	}
 	else {
 	    SendDeathMessage(killerid,playerid,reason);
-		PlayerInfo[killerid][kills] ++;
+		ORM_players[killerid][orm_players_kills] ++;
 	}
 	return 1;
 }

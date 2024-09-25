@@ -26,7 +26,7 @@ stock AddKingCharges(playerid, amount)
 		SkillKingChargeInfo[playerid][skc_objectid][slot] = obj;
 		AttachObjectToPlayer(obj, playerid, floatsin((180 * slot + 90) / MAX_KING_CHARGES - 90, degrees), 0.0, floatcos((180 * slot + 90) / MAX_KING_CHARGES - 90, degrees), 0, 0, 0);
 	}
-	SendClientMessage(playerid, PASTEL_DEEP_GREEN, "King charges have been given!");
+	SendClientMessage(playerid, PASTEL_GREEN_DARK, "King charges have been given!");
 }
 
 stock FindEmptyKingChargeSlot(playerid)
@@ -48,7 +48,7 @@ stock RemoveKingCharges(playerid)
 		DestroyObject(SkillKingChargeInfo[playerid][skc_objectid][i]);
 		SkillKingChargeInfo[playerid][skc_objectid][i] = -1;
 	}
-	SendClientMessage(playerid, PASTEL_DEEP_GREEN, "King charges have been removed!");
+	SendClientMessage(playerid, PASTEL_GREEN_DARK, "King charges have been removed!");
 }
 
 hook OnPlayerDeath(playerid, killerid, reason)
@@ -87,7 +87,7 @@ stock DestroyRookTower(playerid)
 	SkillRookTowerInfo[playerid][srt_is_created] = false;
 	KillTimer(SkillRookTowerInfo[playerid][srt_timerid]);
 	SkillRookTowerInfo[playerid][srt_timerid] = -1;
-	SendClientMessage(playerid, PASTEL_DEEP_PURPLE, "Your tower has been destroyed!");
+	SendClientMessage(playerid, PASTEL_LAVENDER_DARK, "Your tower has been destroyed!");
 }
 
 hook OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
@@ -116,7 +116,7 @@ stock ShootKingCharge(playerid, targetid)
 		if(SkillKingChargeInfo[playerid][skc_objectid][i] != -1) {
 			new string[10];
 			format(string, 10, "Charge %d!", i);
-			SendClientMessage(playerid, PASTEL_DEEP_GREEN, string);
+			SendClientMessage(playerid, PASTEL_GREEN_DARK, string);
 			new Float:dX, Float:dY, Float:dZ,
 				Float:oX, Float:oY, Float:oZ;
 			new Float:charge_velocity = 70.0;
@@ -169,11 +169,11 @@ CMD:tower(playerid, params[])
 		SkillRookTowerInfo[playerid][srt_areaid] = CreateDynamicSphere(pX, pY, pZ, 20);
 		Streamer_SetIntData(STREAMER_AREA_TYPE_SPHERE, SkillRookTowerInfo[playerid][srt_areaid], E_STREAMER_EXTRA_ID, playerid + SKILL_ROOK_TOWERS_EX_ID_OFFSET);
 		SkillRookTowerInfo[playerid][srt_is_created] = true;
-		SendClientMessage(playerid, PASTEL_DEEP_PURPLE, "You have created the tower!");
+		SendClientMessage(playerid, PASTEL_LAVENDER_DARK, "You have created the tower!");
 	}
 	else
 	{
-		SendClientMessage(playerid, PASTEL_DEEP_PURPLE, "You have to be a Rook!");
+		SendClientMessage(playerid, PASTEL_LAVENDER_DARK, "You have to be a Rook!");
 	}
 }
 
@@ -207,6 +207,7 @@ stock SkillRookTowerAimPlayer(playerid, hitid)
 hook OnPlayerLeaveDynamicArea(playerid, areaid)
 {
 	new issuerid = Streamer_GetIntData(STREAMER_AREA_TYPE_SPHERE, areaid, E_STREAMER_EXTRA_ID) - SKILL_ROOK_TOWERS_EX_ID_OFFSET;
+	if(issuerid >= MAX_PLAYERS || issuerid < 0) return 1;
 	if(playerid == SkillRookTowerInfo[issuerid][srt_targetid])
 	{
 		SendClientMessage(issuerid, -1, "SOMEONE LEFT AREA");
@@ -223,7 +224,7 @@ hook OnPlayerLeaveDynamicArea(playerid, areaid)
 			}
 		}
 	}
-	return 1;
+	return 0;
 }
 
 forward ScanRookTower(playerid, hitid);

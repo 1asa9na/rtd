@@ -9,8 +9,9 @@
 #define MAX_KING_CHARGES 10
 #define SKILL_ROOK_TOWERS_EX_ID_OFFSET 400001
 
+#define MAX_ZONE_NAME 24
 #define N_ZONES 31
-#define ZONE_CP_EX_ID_OFFSET 500001
+#define ZONE_AREA_EX_ID_OFFSET 500001
 
 // CLASS INFO
 
@@ -30,8 +31,6 @@ new ClassInfo[N_CLASSES][EClassInfo];
 
 enum EPlayerInfo {
 	bool:is_player_spawned,
-	kills,
-	deaths,
 	bool:is_carrying_bomb,
 	PlayerText:current_textdraw,
 	player_vehicle,
@@ -111,7 +110,7 @@ new CPInfo[N_BOMB_CPS][ECPInfo];
 // ZONE INFO
 
 enum EZoneInfo {
-	z_name[24],
+	z_name[MAX_ZONE_NAME],
 	Float:z_minx,
 	Float:z_miny,
 	Float:z_maxx,

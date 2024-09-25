@@ -1,6 +1,6 @@
 #include <YSI_Coding\y_hooks>
 
-#define MAX_MISSILES 50
+#define MAX_MISSILES 10
 #define MISSILE_EX_ID_OFFSET 300001
 #define MISSILE_VELOCITY 50
 #define MISSILE_HEIGHT 100
@@ -8,7 +8,7 @@
 #define MISSILE_STEP 5
 #define MISSILE_STINGER_STEP 10
 #define MISSILE_STINGER_VELOCITY 70
-#define MISSILE_EXPLOSION_RADIUS 20.0
+#define MISSILE_EXPLOSION_RADIUS 7.0
 
 #define MAX_STATVEHS 16
 #define STATVEH_EX_ID_OFFSET 400001
@@ -302,7 +302,7 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 					MoveObject(r_obj, dfrX, dfrY, dfrZ, missile_velocity);
 					RustlerCooldown[playerid] = true;
 					SetTimerEx("ReleaseRustlerCooldown", 500, false, "i", playerid);
-				} else SendClientMessage(playerid, PASTEL_DEEP_GRAY, "COOLDOWN");
+				} else SendClientMessage(playerid, PASTEL_GRAY_DARK, "COOLDOWN");
 			}
 			case 535: {
 				if(PlayerInfo[playerid][player_stinger] == false)
@@ -365,7 +365,7 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 	new missileid = FindEmptyMissileSlot();
 	if(missileid == -1)
 	{
-		SendClientMessage(playerid, PASTEL_DEEP_ORANGE, "Missiles overflow!");
+		SendClientMessage(playerid, PASTEL_CORAL_DARK, "Missiles overflow!");
 		return -1;
 	}
 	new objectid = CreateDynamicObject(345, oX, oY, oZ, 0, 0, 0);
@@ -379,7 +379,7 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 	WMInfo[missileid][wm_faced_obstacle] = false;
 
 	MoveDynamicObject(objectid, dX, dY, dZ, MISSILE_VELOCITY, 0, 0, 0);
-	SendClientMessage(playerid, PASTEL_DEEP_ORANGE, "Missile Launched!");
+	SendClientMessage(playerid, PASTEL_CORAL_DARK, "Missile Launched!");
 	
 	return missileid;
 }
