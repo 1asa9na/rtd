@@ -1,6 +1,8 @@
 #define N_CLASSES 2
 #define N_PICKUPS 1
 
+#define MAX_CLASS_NAME 10
+
 #define BOMB_CP_EX_ID_OFFSET 200001
 #define N_BOMB_CPS 2
 #define N_PERKS 4
@@ -20,9 +22,10 @@ enum EClassInfo {
 	Float:y,
 	Float:z,
 	Float:a,
-	title[32],
+	title[MAX_CLASS_NAME],
 	skin,
-	color
+	class_color,
+	class_color_tag
 };
 
 new ClassInfo[N_CLASSES][EClassInfo];

@@ -308,7 +308,7 @@ hook OnPlayerConnect(playerid)
 {
     for(new i = 0; i < N_ZONES; i++)
     {
-        GangZoneShowForPlayer(playerid, i, (ZoneInfo[i][z_team] == -1)?(0xFFFFFF80):(ClassInfo[ZoneInfo[i][z_team]][color]));
+        GangZoneShowForPlayer(playerid, i, (ZoneInfo[i][z_team] == -1)?(0xFFFFFF80):(ClassInfo[ZoneInfo[i][z_team]][class_color]));
     }
     return 1;
 }
@@ -328,7 +328,7 @@ stock StartZoneCapture(zoneid, playerid)
     ZoneInfo[zoneid][z_is_active] = true;
     ZoneInfo[zoneid][z_attacker] = playerid;
     ZoneInfo[zoneid][z_timer] = SetTimerEx("ZoneCaptureProgress", 1000, true, "i", zoneid);
-    GangZoneFlashForAll(zoneid, ClassInfo[GetPlayerTeam(playerid)][color]);
+    GangZoneFlashForAll(zoneid, ClassInfo[GetPlayerTeam(playerid)][class_color]);
     ZoneStartCaptureMsg(playerid, zoneid);
 }
 
@@ -360,8 +360,12 @@ stock EndZoneCapture(zoneid, playerid, bool:success)
     KillTimer(ZoneInfo[zoneid][z_timer]);
     GangZoneStopFlashForAll(zoneid);
     if(success) {
-        ZoneCapturedMsg(playerid, zoneid);
-        GangZoneShowForAll(zoneid, ClassInfo[GetPlayerTeam(playerid)][color]);
+        new delta_money = random(4500) + 3000;
+		new delta_score = random(3) + 2;
+		ORM_players[playerid][orm_players_money] += delta_money;
+		ORM_players[playerid][orm_players_score] += delta_score;
+        ZoneCapturedMsg(playerid, zoneid, delta_money, delta_score);
+        GangZoneShowForAll(zoneid, ClassInfo[GetPlayerTeam(playerid)][class_color]);
         ZoneInfo[zoneid][z_team] = GetPlayerTeam(playerid);
     }
     TextDrawHideForPlayer(playerid, ZoneInfo[zoneid][z_textdraw]);
@@ -372,28 +376,40 @@ stock EndZoneCapture(zoneid, playerid, bool:success)
 
 stock ZoneStartCaptureMsg(playerid, zoneid)
 {
-    new string[54 - 8 + 12 + MAX_PLAYER_NAME + MAX_ZONE_NAME];
+    new string[37 - 8 + 18 + MAX_ZONE_NAME];
     new playername[MAX_PLAYER_NAME];
     GetPlayerName(playerid, playername);
     new zonecolor[7];
     if(ZoneInfo[zoneid][z_team] == -1) strins(zonecolor, "FFFFFF", 0);
-    else format(zonecolor, 7, "%x", ClassInfo[ZoneInfo[zoneid][z_team]][color]);
-    new playercolor[7];
-    format(playercolor, 7, "%x", ClassInfo[GetPlayerTeam(playerid)][color]);
-    format(string, sizeof(string), "{%s}%s {F0F0F5}started capturing zone {%s}%s{F0F0F5}!", playercolor, playername, zonecolor, ZoneInfo[zoneid][z_name]);
-    SendClientMessageToAll(-1, string);
+    else format(zonecolor, 7, "%x", ClassInfo[ZoneInfo[zoneid][z_team]][class_color]);
+	new normalcolor[7];
+	format(normalcolor, 7, "%x", PASTEL_PEACH_LIGHT);
+    format(string, sizeof(string), "{%s}You started capturing {%s}%s{%s}!", normalcolor, zonecolor, ZoneInfo[zoneid][z_name], normalcolor);
+    SendClientMessage(playerid, -1, string);
 }
 
-stock ZoneCapturedMsg(playerid, zoneid)
+stock ZoneCapturedMsg(playerid, zoneid, money, score)
 {
-    new string[48 - 8 + 12 + MAX_PLAYER_NAME + MAX_ZONE_NAME];
+    new string[82 - 20 + 42 + MAX_ZONE_NAME + 4 + 1];
     new playername[MAX_PLAYER_NAME];
     GetPlayerName(playerid, playername);
     new zonecolor[7];
+    new zonecolortag = 'w';
     if(ZoneInfo[zoneid][z_team] == -1) strins(zonecolor, "FFFFFF", 0);
-    else format(zonecolor, 7, "%x", ClassInfo[ZoneInfo[zoneid][z_team]][color]);
-    new playercolor[7];
-    format(playercolor, 7, "%x", ClassInfo[GetPlayerTeam(playerid)][color]);
-    format(string, sizeof(string), "{%s}%s {F0F0F5}has captured zone {%s}%s{F0F0F5}!", playercolor, playername, zonecolor, ZoneInfo[zoneid][z_name]);
-    SendClientMessageToAll(-1, string);
+    else 
+    {
+        format(zonecolor, 7, "%x", ClassInfo[ZoneInfo[zoneid][z_team]][class_color]);
+        zonecolortag = ClassInfo[ZoneInfo[zoneid][z_team]][class_color_tag];
+    }
+    new accentcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_TEAL_LIGHT);
+
+	new normalcolor[7];
+	format(normalcolor, 7, "%x", PASTEL_PEACH_LIGHT);
+
+    format(string, sizeof(string), "{%s}You have captured {%s}%s{%s}, recieved {%s}%d${%s} cash and {%s}%d{%s} score!", normalcolor, zonecolor, ZoneInfo[zoneid][z_name], normalcolor, accentcolor, money, normalcolor, accentcolor, score, normalcolor);
+    SendClientMessage(playerid, -1, string);
+    new feedstring[34 - 8 + 2 + MAX_PLAYER_NAME + MAX_ZONE_NAME];
+    format(feedstring, sizeof(feedstring), "~%c~%s~w~ has captured the ~%c~%s", ClassInfo[GetPlayerTeam(playerid)][class_color_tag], playername, zonecolortag, ZoneInfo[zoneid][z_name]);
+    AddFeedMessage(feedstring);
 }

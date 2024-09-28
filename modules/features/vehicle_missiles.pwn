@@ -10,7 +10,7 @@
 #define MISSILE_STINGER_VELOCITY 70
 #define MISSILE_EXPLOSION_RADIUS 7.0
 
-#define MAX_STATVEHS 16
+#define MAX_STATVEHS 17
 #define STATVEH_EX_ID_OFFSET 400001
 
 // COOLDOWNS
@@ -172,6 +172,13 @@ hook OnGameModeInit()
 	VehicleInfo[15][veh_oX] = 0.0;
 	VehicleInfo[15][veh_oY] = -1.8;
 	VehicleInfo[15][veh_oZ] = 0.0;
+
+	VehicleInfo[16][veh_modelid] = 497;
+	VehicleInfo[16][vehX] = 1249.8494;
+	VehicleInfo[16][vehY] = 405.6464;
+	VehicleInfo[16][vehZ] = 32.9776;
+	VehicleInfo[16][vehA] = 247.6255;
+	VehicleInfo[16][veh_objectid] = -1;
 	
 	for(new i = 0; i < MAX_STATVEHS; i++) {
 		VehicleInfo[i][vehid] = AddStaticVehicle(
@@ -186,7 +193,7 @@ hook OnGameModeInit()
 		if(VehicleInfo[i][veh_objectid] != -1)
 		{
 			new objectid = CreateDynamicObject(VehicleInfo[i][veh_objectid], 0, 0, 0, 0, 0, 0);
-			AttachDynamicObjectToVehicle(objectid, VehicleInfo[i][vehid], VehicleInfo[15][veh_oX], VehicleInfo[15][veh_oY], VehicleInfo[15][veh_oZ], 0, 0, 0);
+			AttachDynamicObjectToVehicle(objectid, VehicleInfo[i][vehid], VehicleInfo[i][veh_oX], VehicleInfo[i][veh_oY], VehicleInfo[i][veh_oZ], 0, 0, 0);
 		}
 	}
 }
@@ -197,7 +204,7 @@ hook OnPlayerConnect(playerid)
 	return 1;
 }
 
-hook OnPlayerSpawn(playerid)
+hook OnCharacterSpawn(playerid)
 {
 	SetPlayerLastDamager(playerid, INVALID_PLAYER_ID, 47);
 	PlayerInfo[playerid][player_stinger] = false;

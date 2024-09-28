@@ -46,13 +46,35 @@ hook OnPlayerDeath(playerid, killerid, reason)
 		GetPlayerLastDamager(playerid, t_killerid, t_reason);
 		killerid = t_killerid;
 		reason = t_reason;
-	    SendDeathMessage(killerid,playerid,reason);
 	}
-	else {
-	    SendDeathMessage(killerid,playerid,reason);
+	if(killerid == playerid) killerid = INVALID_PLAYER_ID;
+	SendDeathMessage(killerid,playerid,reason);
+	if(killerid != INVALID_PLAYER_ID)
+	{
+		new delta_money = random(4500) + 3000;
+		new delta_score = random(3) + 2;
+		ORM_players[killerid][orm_players_money] += delta_money;
+		ORM_players[killerid][orm_players_score] += delta_score;
 		ORM_players[killerid][orm_players_kills] ++;
+		OnPlayerKillMsg(killerid, playerid, delta_money, delta_score);
 	}
 	return 1;
+}
+
+stock OnPlayerKillMsg(killerid, playerid, money, score)
+{
+	new playercolor[7];
+    format(playercolor, 7, "%x", ClassInfo[GetPlayerTeam(playerid)][class_color]);
+
+	new accentcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_TEAL_LIGHT);
+
+	new normalcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_PEACH_LIGHT);
+
+	new string[74 - 20 + MAX_PLAYER_NAME + 42 + 1 + 3];
+	format(string, sizeof(string), "{%s}You killed {%s}%s, {%s}recieved {%s}%d$ {%s}cash and {%s}%d {%s}score", normalcolor, playercolor, ORM_players[playerid][orm_players_name], normalcolor, accentcolor, money, normalcolor, accentcolor, score, normalcolor);
+	SendClientMessage(killerid, -1, string);
 }
 
 hook OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, Float:fZ)

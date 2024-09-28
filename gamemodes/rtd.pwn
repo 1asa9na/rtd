@@ -12,6 +12,7 @@
 #include "..\modules\misc\mapping.pwn"
 #include "..\modules\features\weapons.pwn"
 #include "..\modules\features\zones.pwn"
+#include "..\modules\misc\feed.pwn"
 
 /* OFFSETS
 
@@ -32,7 +33,8 @@ public OnGameModeInit()
 	ClassInfo[0][a] = 117.9194;
 	strins(ClassInfo[0][title], "BLYADS", 0);
 	ClassInfo[0][skin] = 29;
-	ClassInfo[0][color] = 0xFFFF0480;
+	ClassInfo[0][class_color] = 0xE5BD6080;
+	ClassInfo[0][class_color_tag] = 'y';
 	
 	ClassInfo[1][x] = 1238.5229;
 	ClassInfo[1][y] = 213.6815;
@@ -40,10 +42,12 @@ public OnGameModeInit()
 	ClassInfo[1][a] = 115.0993;
 	strins(ClassInfo[1][title], "GRIBS", 0);
 	ClassInfo[1][skin] = 73;
-	ClassInfo[1][color] = 0xFF040480;
+	ClassInfo[1][class_color] = 0xB1191C80;
+	ClassInfo[1][class_color_tag] = 'r';
 		
 	SetGameModeText("My first open.mp gamemode!");
 	UsePlayerPedAnims();
+	EnableStuntBonusForAll(false);
 	DisableInteriorEnterExits();
 	LimitPlayerMarkerRadius(100.0);
 	
@@ -205,11 +209,19 @@ public PlayerLogin(playerid)
 	PlayerInfo[playerid][is_player_spawned] = false;
 	PlayerInfo[playerid][is_carrying_bomb] = false;
 	PlayerInfo[playerid][player_change_team] = true;
-	PlayerInfo[playerid][current_textdraw] = CreatePlayerTextDraw(playerid, 0, 0, "initial textdraw");
 	SetPlayerColor(playerid, 0x808080FF);
-	
-	GivePlayerMoney(playerid, 50);
 	return 1;
+}
+
+public OnPlayerUpdate(playerid)
+{
+	new money = GetPlayerMoney(playerid);
+	if(money != ORM_players[playerid][orm_players_money])
+	{
+		new delta_money = ORM_players[playerid][orm_players_money] - money;
+		GivePlayerMoney(playerid, delta_money);
+	}
+	if(GetPlayerScore(playerid) != ORM_players[playerid][orm_players_score]) SetPlayerScore(playerid, ORM_players[playerid][orm_players_score]);
 }
 
 public OnPlayerRequestClass(playerid, classid)
@@ -266,20 +278,32 @@ public OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
 
 public OnPlayerSpawn(playerid)
 {
-	SetPlayerInterior(playerid, 0);
-	SetPlayerWorldBounds(playerid, 1496, 1173, 477, 96);
-	
-	new classid = GetPlayerTeam(playerid);
-	SetPlayerColor(playerid, ClassInfo[classid][color]);
+	if(PlayerInfo[playerid][player_change_team] == false)
+	{
+		SetPlayerInterior(playerid, 0);
+		SetPlayerWorldBounds(playerid, 1496, 1173, 477, 96);
+		
+		new classid = GetPlayerTeam(playerid);
+
+		CallLocalFunction("OnCharacterSpawn", "i", playerid);
+		SetPlayerColor(playerid, ClassInfo[classid][class_color]);
+		
+		PlayerInfo[playerid][is_player_spawned] = true;
+	}
+	return 1;
+}
+
+DEFINE_HOOK_RETURN__(OnCharacterSpawn, 0);
+
+forward OnCharacterSpawn(playerid);
+public OnCharacterSpawn(playerid)
+{
 	if(PlayerInfo[playerid][player_perk] != -1)
 	{
 		for(new i = 0; i < 3; i++) GivePlayerWeapon(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_weapons][i], PerkInfo[PlayerInfo[playerid][player_perk]][perk_weapon_ammo][i]);
 		SetPlayerHealth(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_health]);
 		SetPlayerArmour(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_armour]);
 	}
-	
-	PlayerInfo[playerid][is_player_spawned] = true;
-	return 1;
 }
 
 public OnPlayerDeath(playerid, killerid, reason)
@@ -287,17 +311,24 @@ public OnPlayerDeath(playerid, killerid, reason)
 	PlayerInfo[playerid][is_player_spawned] = false;
 	SetPlayerColor(playerid, 0xFF808080);
 	
-	if (PlayerInfo[playerid][is_carrying_bomb] == true) {
+	if (PlayerInfo[playerid][is_carrying_bomb] == true)
+	{
 		PlayerInfo[playerid][is_carrying_bomb] = false;
 		PickupInfo[0][is_picked_up] = false;
 		PickupInfo[0][picked_up_by_team] = 255;
-		SendClientMessage(playerid, 0xFFFF0000, "You have lost the bomb!");
+		SendClientMessage(playerid, 0xFF0000FF, "You have lost the bomb!");
 	}
 	
-	if(PlayerInfo[playerid][player_change_team]) {
+	if(PlayerInfo[playerid][player_change_team])
+	{
 		ForceClassSelection(playerid);
-	} else ORM_players[playerid][orm_players_deaths] ++;
-	
+	}
+	else
+	{
+		ORM_players[playerid][orm_players_deaths] ++;
+		ORM_players[playerid][orm_players_money] = max(ORM_players[playerid][orm_players_money] - 1200, 0);
+		SendClientMessage(playerid, 0xFF0000FF, "You died and lost 1200$ cash!");
+	}
 	return 1;
 }
 
@@ -369,7 +400,18 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 			CPInfo[bombcpid][cp_player] = playerid;
 			CPInfo[bombcpid][cp_team] = GetPlayerTeam(playerid);
 			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4.1, false, false, false, true, 2670, 1);
-			SendClientMessageToAll(0xFFFF00FF, "Bomb has been planted!");
+			new Float:pX, Float:pY, Float:pZ;
+			for(new i = 0; i < MAX_PLAYERS; i++)
+			{
+				if(IsPlayerConnected(playerid) && GetPlayerTeam(i) != GetPlayerTeam(playerid))
+				{
+					GetPlayerPos(i, pX, pY, pZ);
+					PlayerPlaySound(i, 25800, pX, pY, pZ);
+				}
+			}
+			GetPlayerPos(playerid, pX, pY, pZ);
+			PlayerPlaySound(playerid, 21002, pX, pY, pZ);
+			GameTextForAll("~r~BOMB HAS BEEN PLANTED", 3000, 5);
 			CPInfo[bombcpid][cp_bomb_timer] = SetTimerEx("DestroyPickupBomb", 40*1000, false, "ii",	bombcpid, playerid);
 			CPInfo[bombcpid][is_active] = true;
 			PlayerInfo[playerid][is_carrying_bomb] = false;
@@ -378,7 +420,7 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 		{
 			CPInfo[bombcpid][cp_player] = playerid;
 			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4.1, false, false, false, true, 2670, 1);
-			SendClientMessageToAll(0xFFFF00FF, "Bomb is being defused!");
+			SendClientMessage(playerid, PASTEL_CORAL_DARK, "You started defusing the bomb!");
 			CPInfo[bombcpid][cp_defuse_timer] = SetTimerEx("DefusePickupBomb", 10*1000, false, "ii", bombcpid, playerid);
 		}
 	}
@@ -392,7 +434,7 @@ public OnPlayerLeaveDynamicCP(playerid, checkpointid)
 	CPInfo[bombcpid][occupied] = false;
 	if(CPInfo[bombcpid][cp_player] == playerid && CPInfo[bombcpid][cp_defuse_timer] != -1)
 	{
-		SendClientMessage(playerid, 0xFFFF00FF, "Bomb defusing has been interrupted!");
+		SendClientMessage(playerid, PASTEL_CORAL_DARK, "Bomb defusing has been interrupted!");
 		KillTimer(CPInfo[bombcpid][cp_defuse_timer]);
 		CPInfo[bombcpid][cp_defuse_timer] = -1;
 		
@@ -403,7 +445,6 @@ public OnPlayerLeaveDynamicCP(playerid, checkpointid)
 forward DestroyPickupBomb(checkpointid, playerid);
 public DestroyPickupBomb(checkpointid, playerid)
 {
-	SendClientMessageToAll(0xFFFF00FF, "Bomb has been exploded!");
 	CreateExplosion(CPInfo[checkpointid][cp_x], CPInfo[checkpointid][cp_y], CPInfo[checkpointid][cp_z], 6, 50);
 	
 	KillTimer(CPInfo[checkpointid][cp_bomb_timer]);
@@ -415,15 +456,20 @@ public DestroyPickupBomb(checkpointid, playerid)
 	CPInfo[checkpointid][cp_team] = -1;
 	PickupInfo[0][is_picked_up] = false;
 	PickupInfo[0][picked_up_by_team] = -1;
-	new player_score = GetPlayerScore(playerid);
-	SetPlayerScore(playerid, player_score + 10);
+	for(new i = 0; i < MAX_PLAYERS; i++)
+	{
+		if(IsPlayerConnected(i) && GetPlayerTeam(i) == GetPlayerTeam(playerid))
+		{
+			ORM_players[playerid][orm_players_money] += 10000;
+			ORM_players[playerid][orm_players_score] += 15;
+		}
+	}
+	DestroyBombMsg(GetPlayerTeam(playerid));
 }
 
 forward DefusePickupBomb(checkpointid, playerid);
 public DefusePickupBomb(checkpointid, playerid)
-{
-	SendClientMessageToAll(0xFFFF00FF, "Bomb has been defused!");
-	
+{	
 	KillTimer(CPInfo[checkpointid][cp_bomb_timer]);
 	KillTimer(CPInfo[checkpointid][cp_defuse_timer]);
 	CPInfo[checkpointid][cp_bomb_timer] = -1;
@@ -434,6 +480,27 @@ public DefusePickupBomb(checkpointid, playerid)
 	PickupInfo[0][is_picked_up] = false;
 	PickupInfo[0][picked_up_by_team] = -1;
 	PlayerInfo[playerid][is_carrying_bomb] = false;
-	new player_score = GetPlayerScore(playerid);
-	SetPlayerScore(playerid, player_score + 10);
+	for(new i = 0; i < MAX_PLAYERS; i++)
+	{
+		if(IsPlayerConnected(i) && GetPlayerTeam(i) == GetPlayerTeam(playerid))
+		{
+			ORM_players[playerid][orm_players_money] += 10000;
+			ORM_players[playerid][orm_players_score] += 15;
+		}
+	}
+	DefuseBombMsg(GetPlayerTeam(playerid));
+}
+
+stock DestroyBombMsg(teamid)
+{
+	new string[47 - 4 + MAX_CLASS_NAME + 1];
+	format(string, sizeof(string), "~%c~%s team ~w~successfully exploded the bomb!", ClassInfo[teamid][class_color_tag], ClassInfo[teamid][title]);
+	AddFeedMessage(string);
+}
+
+stock DefuseBombMsg(teamid)
+{
+	new string[46 - 4 + MAX_CLASS_NAME + 1];
+	format(string, sizeof(string), "~%c~%s team ~w~successfully defused the bomb!", ClassInfo[teamid][class_color_tag], ClassInfo[teamid][title]);
+	AddFeedMessage(string);
 }
