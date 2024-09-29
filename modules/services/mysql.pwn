@@ -20,7 +20,8 @@ enum E_ORM_players {
     orm_players_kills,
     orm_players_money,
     orm_players_deaths,
-    orm_players_score
+    orm_players_score,
+    orm_players_zones_captured
 };
 
 new ORM_players[MAX_PLAYERS][E_ORM_players];
@@ -58,6 +59,7 @@ hook OnPlayerConnect(playerid)
     orm_addvar_int(ORM_players[playerid][ORM_ID], ORM_players[playerid][orm_players_deaths], "deaths");
     orm_addvar_int(ORM_players[playerid][ORM_ID], ORM_players[playerid][orm_players_score], "score");
     orm_addvar_int(ORM_players[playerid][ORM_ID], ORM_players[playerid][orm_players_money], "money");
+    orm_addvar_int(ORM_players[playerid][ORM_ID], ORM_players[playerid][orm_players_zones_captured], "zones_captured");
 
     orm_setkey(ORM_players[playerid][ORM_ID], "name");
     orm_select(ORM_players[playerid][ORM_ID], "OnPlayerDataLoaded", "d", playerid);

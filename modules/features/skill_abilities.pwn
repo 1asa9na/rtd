@@ -2,7 +2,6 @@
 
 hook OnCharacterSpawn(playerid)
 {
-	SendClientMessage(playerid, -1, "King spawned");
     switch(PlayerInfo[playerid][player_perk]) {
 		case 3: {
 			AddKingCharges(playerid, MAX_KING_CHARGES);

@@ -1,5 +1,11 @@
 #include <YSI_Coding\y_hooks>
 
+new gBonusZone;
+new gBonusZoneMoney;
+new gBonusZoneScore;
+
+new gDangerZone;
+
 hook OnGameModeInit()
 {
     strins(ZoneInfo[0][z_name], "Helicopter platform", 0);
@@ -293,7 +299,7 @@ hook OnGameModeInit()
             TextDrawAlignment(ZoneInfo[i][z_textdraw], 1);
             TextDrawFont(ZoneInfo[i][z_textdraw], 1);
 
-            Create3DTextLabel(ZoneInfo[i][z_name], PASTEL_BROWN_DARK, ZoneInfo[i][z_cp_x], ZoneInfo[i][z_cp_y], ZoneInfo[i][z_cp_z], 25.0 , 0, 1);
+            Create3DTextLabel(ZoneInfo[i][z_name], PASTEL_TEAL_LIGHT, ZoneInfo[i][z_cp_x], ZoneInfo[i][z_cp_y], ZoneInfo[i][z_cp_z], 25.0 , 0, 1);
         }
         else ZoneInfo[i][z_cp] = -1;
         ZoneInfo[8][z_team] = 0;
@@ -301,6 +307,9 @@ hook OnGameModeInit()
         ZoneInfo[i][z_is_active] = false;
         ZoneInfo[i][z_progress] = 0;
         ZoneInfo[i][z_timer] = -1;
+
+        gBonusZone = -1;
+        gDangerZone = -1;
     }
 }
 
@@ -364,9 +373,18 @@ stock EndZoneCapture(zoneid, playerid, bool:success)
 		new delta_score = random(3) + 2;
 		ORM_players[playerid][orm_players_money] += delta_money;
 		ORM_players[playerid][orm_players_score] += delta_score;
+        ORM_players[playerid][orm_players_zones_captured] ++;
         ZoneCapturedMsg(playerid, zoneid, delta_money, delta_score);
         GangZoneShowForAll(zoneid, ClassInfo[GetPlayerTeam(playerid)][class_color]);
         ZoneInfo[zoneid][z_team] = GetPlayerTeam(playerid);
+        if(zoneid == gBonusZone)
+        {
+            ORM_players[playerid][orm_players_money] += gBonusZoneMoney;
+            ORM_players[playerid][orm_players_score] += gBonusZoneScore;
+            BonusZoneCapturedMsg(playerid);
+            gBonusZone = -1;
+        }
+
     }
     TextDrawHideForPlayer(playerid, ZoneInfo[zoneid][z_textdraw]);
     ZoneInfo[zoneid][z_is_active] = false;
@@ -386,6 +404,29 @@ stock ZoneStartCaptureMsg(playerid, zoneid)
 	format(normalcolor, 7, "%x", PASTEL_PEACH_LIGHT);
     format(string, sizeof(string), "{%s}You started capturing {%s}%s{%s}!", normalcolor, zonecolor, ZoneInfo[zoneid][z_name], normalcolor);
     SendClientMessage(playerid, -1, string);
+}
+
+stock BonusZoneCapturedMsg(playerid)
+{
+    new accentcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_TURQUOISE_LIGHT);
+
+	new normalcolor[7];
+	format(normalcolor, 7, "%x", PASTEL_BROWN_LIGHT);
+
+    new string[90 - 20 + 42 + MAX_ZONE_NAME + 5 + 2];
+    format(string, sizeof(string), "{%s}You've got the bonus from {%s}%s{%s}, recieved {%s}%d${%s} cash and {%s}%d{%s} score!", normalcolor, accentcolor, ZoneInfo[gBonusZone], normalcolor, accentcolor, gBonusZoneMoney, normalcolor,accentcolor, gBonusZoneScore, normalcolor);
+    SendClientMessage(playerid, -1, string);
+
+    new playername[MAX_PLAYER_NAME];
+    GetPlayerName(playerid, playername, MAX_PLAYER_NAME);
+
+    new playercolor[7];
+	format(playercolor, 7, "%x", ClassInfo[GetPlayerTeam(playerid)][class_color]);
+
+    new stringtoall[90 - 24 + 48 + MAX_PLAYER_NAME + MAX_ZONE_NAME + 5 + 2];
+    format(stringtoall, sizeof(stringtoall), "{%s}%s{%s} got the bonus from {%s}%s{%s}, recieved {%s}%d${%s} cash and {%s}%d{%s} score!", playercolor, playername, normalcolor, accentcolor, ZoneInfo[gBonusZone], normalcolor, accentcolor, gBonusZoneMoney, normalcolor,accentcolor, gBonusZoneScore, normalcolor);
+    SendClientMessageToAll(-1, stringtoall);
 }
 
 stock ZoneCapturedMsg(playerid, zoneid, money, score)
@@ -412,4 +453,100 @@ stock ZoneCapturedMsg(playerid, zoneid, money, score)
     new feedstring[34 - 8 + 2 + MAX_PLAYER_NAME + MAX_ZONE_NAME];
     format(feedstring, sizeof(feedstring), "~%c~%s~w~ has captured the ~%c~%s", ClassInfo[GetPlayerTeam(playerid)][class_color_tag], playername, zonecolortag, ZoneInfo[zoneid][z_name]);
     AddFeedMessage(feedstring);
+}
+
+hook MinuteUpdate()
+{
+    if(gMinutes % 2 == 0)
+    {
+        UpdateBonusZone();
+    }
+    else
+    {
+        UpdateDangerZone();
+    }
+}
+
+stock UpdateBonusZone()
+{
+    new accentcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_TURQUOISE_LIGHT);
+
+	new normalcolor[7];
+	format(normalcolor, 7, "%x", PASTEL_BROWN_LIGHT);
+
+    if(gBonusZone != -1)
+    {
+        new string[63 - 6 + 12 + MAX_ZONE_NAME];
+        format(string, sizeof(string), "{%s}%s{%s} is not a bonus zone anymore. Setting a new bonus...", accentcolor, ZoneInfo[gBonusZone][z_name], normalcolor);
+        SendClientMessageToAll(-1, string);
+    }
+    new bonuszone = -1;
+
+    while(bonuszone == 8 || bonuszone == 21 || bonuszone == -1) {
+        bonuszone = random(N_ZONES);
+        print("gde blyad");
+    }
+    gBonusZone = bonuszone;
+
+    ZoneInfo[bonuszone][z_team] = -1;
+    GangZoneShowForAll(bonuszone, 0xFFFFFF80);
+
+    new delta_money = random(60000) + 15000;
+	new delta_score = random(40) + 15;
+
+    gBonusZoneMoney = delta_money;
+    gBonusZoneScore = delta_score;
+
+    new string1[28 - 6 + 12 + MAX_ZONE_NAME];
+    new string2[68 - 14 + 30 + 5 + 2];
+    format(string1, sizeof(string1), "{%s}New bonus zone:{%s} %s", normalcolor, accentcolor, ZoneInfo[bonuszone][z_name]);
+    format(string2, sizeof(string2), "{%s}Capture this zone to get {%s}%d${%s} cash and {%s}%d{%s} score!", normalcolor, accentcolor, delta_money, normalcolor, accentcolor, delta_score, normalcolor);
+    SendClientMessageToAll(-1, string1);
+    SendClientMessageToAll(-1, string2);
+}
+
+stock UpdateDangerZone()
+{
+    new accentcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_TURQUOISE_DARK);
+
+	new normalcolor[7];
+	format(normalcolor, 7, "%x", PASTEL_BROWN_LIGHT);
+
+    new dangerzone = -1;
+
+    while(dangerzone == 8 || dangerzone == 21 || dangerzone == -1) dangerzone = random(N_ZONES);
+    gDangerZone = dangerzone;
+
+    new string[63 - 8 + 18 + MAX_ZONE_NAME];
+    format(string, sizeof(string), "{%s}New danger zone:{%s} %s{%s}. Beware of entering this zone!", normalcolor, accentcolor, ZoneInfo[dangerzone][z_name], normalcolor);
+    SendClientMessageToAll(-1, string);
+}
+
+hook SecondUpdate()
+{
+    if(gDangerZone != -1)
+    {
+        if(gSeconds % 10 == 0)
+        {
+            new Float:rX = ZoneInfo[gDangerZone][z_minx] + (ZoneInfo[gDangerZone][z_maxx] - ZoneInfo[gDangerZone][z_minx]) / 5 * random(5);
+            new Float:rY = ZoneInfo[gDangerZone][z_miny] + (ZoneInfo[gDangerZone][z_maxy] - ZoneInfo[gDangerZone][z_miny]) / 5 * random(5);
+
+            new Float:rZ;
+
+            CA_FindZ_For2DCoord(rX, rY, rZ);
+
+            new obj = CreateDynamicObject(18693, rX, rY, rZ + 50, 0, 0, 0);
+            MoveDynamicObject(obj, rX, rY, rZ, 25);
+            SetTimerEx("DestroyDangerZoneObject", 2000, false, "ifff", obj, rX, rY, rZ);
+        }
+    }
+}
+
+forward DestroyDangerZoneObject(obj, Float:rX, Float:rY, Float:rZ);
+public DestroyDangerZoneObject(obj, Float:rX, Float:rY, Float:rZ)
+{
+    CreateExplosion(rX, rY, rZ, 6, 15.0);
+    DestroyDynamicObject(obj);
 }

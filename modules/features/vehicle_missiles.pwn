@@ -9,6 +9,7 @@
 #define MISSILE_STINGER_STEP 10
 #define MISSILE_STINGER_VELOCITY 70
 #define MISSILE_EXPLOSION_RADIUS 7.0
+#define MISSILE_COOLDOWN 60
 
 #define MAX_STATVEHS 17
 #define STATVEH_EX_ID_OFFSET 400001
@@ -16,6 +17,7 @@
 // COOLDOWNS
 
 new bool:RustlerCooldown[MAX_PLAYERS];
+new MissileCooldown[MAX_PLAYERS];
 
 // VEHICLES INFO 
 
@@ -29,7 +31,7 @@ enum EVehicleInfo {
 	veh_objectid,
 	Float:veh_oX,
 	Float:veh_oY,
-	Float:veh_oZ
+	Float:veh_oZ,
 }
 
 new VehicleInfo[MAX_STATVEHS][EVehicleInfo];
@@ -201,6 +203,7 @@ hook OnGameModeInit()
 hook OnPlayerConnect(playerid)
 {
 	RustlerCooldown[playerid] = false;
+	MissileCooldown[playerid] = 0;
 	return 1;
 }
 
@@ -314,10 +317,15 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 			case 535: {
 				if(PlayerInfo[playerid][player_stinger] == false)
 				{
-					PlayerInfo[playerid][player_stinger] = true;
-					new missileid = LaunchPlayerMissile(playerid, playerid, 3);
-					if(missileid == -1) return 1;
-					AttachCameraToDynamicObject(playerid, WMInfo[missileid][wm_objectid]);
+					if(MissileCooldown[playerid] == 0)
+					{
+						PlayerInfo[playerid][player_stinger] = true;
+						new missileid = LaunchPlayerMissile(playerid, playerid, 3);
+						if(missileid == -1) return 1;
+						AttachCameraToDynamicObject(playerid, WMInfo[missileid][wm_objectid]);
+						MissileCooldown[playerid] = MISSILE_COOLDOWN;
+					}
+					MissileCoolDownMessage(playerid);
 				} else
 				{
 					DestroyMissile(PlayerInfo[playerid][player_stinger_missile]);
@@ -349,13 +357,32 @@ hook OnPlayerClickPlayer(playerid, clickedplayerid, source)
 {
 	new vehicleid = GetPlayerVehicleID(playerid);
 	switch(GetVehicleModel(vehicleid)) {
-		case 423: LaunchPlayerMissile(playerid, clickedplayerid, 1);
-		case 413: LaunchPlayerMissile(playerid, clickedplayerid, 2);
+		case 423: if(MissileCooldown[playerid] == 0) LaunchPlayerMissile(playerid, clickedplayerid, 1); else MissileCoolDownMessage(playerid);
+		case 413: if(MissileCooldown[playerid] == 0) LaunchPlayerMissile(playerid, clickedplayerid, 2); else MissileCoolDownMessage(playerid);
 	}
 	return 0;
 }
 
+hook SecondUpdate()
+{
+	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && MissileCooldown[i] > 0) MissileCooldown[i]--;
+}
+
+stock MissileCoolDownMessage(playerid)
+{
+	new accentcolor[7];
+	format(accentcolor, 7, "%x", PASTEL_TEAL_LIGHT);
+
+	new normalcolor[7];
+	format(normalcolor, 7, "%x", PASTEL_PEACH_LIGHT);
+
+	new string[64 - 8 + 18 + 2];
+	format(string, sizeof(string), "{%s}Wait {%s}%d seconds{%s} before launching the missile again!", normalcolor, accentcolor, MissileCooldown[playerid], normalcolor);
+	SendClientMessage(playerid, -1, string);
+}
+
 stock LaunchPlayerMissile(playerid, victimid, type) {
+	MissileCooldown[playerid] = MISSILE_COOLDOWN;
 	new Float:oX, Float:oY, Float:oZ,
 		Float:dX, Float:dY, Float:dZ,
 		Float:tX, Float:tY, Float:tZ;

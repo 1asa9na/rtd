@@ -25,7 +25,8 @@ enum EClassInfo {
 	title[MAX_CLASS_NAME],
 	skin,
 	class_color,
-	class_color_tag
+	class_color_tag,
+	team_score
 };
 
 new ClassInfo[N_CLASSES][EClassInfo];

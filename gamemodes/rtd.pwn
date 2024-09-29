@@ -11,8 +11,9 @@
 #include "..\modules\services\mysql.pwn"
 #include "..\modules\misc\mapping.pwn"
 #include "..\modules\features\weapons.pwn"
-#include "..\modules\features\zones.pwn"
 #include "..\modules\misc\feed.pwn"
+#include "..\modules\features\zones.pwn"
+#include "..\modules\misc\stats.pwn"
 
 /* OFFSETS
 
@@ -35,6 +36,7 @@ public OnGameModeInit()
 	ClassInfo[0][skin] = 29;
 	ClassInfo[0][class_color] = 0xE5BD6080;
 	ClassInfo[0][class_color_tag] = 'y';
+	ClassInfo[0][team_score] = 0;
 	
 	ClassInfo[1][x] = 1238.5229;
 	ClassInfo[1][y] = 213.6815;
@@ -44,6 +46,7 @@ public OnGameModeInit()
 	ClassInfo[1][skin] = 73;
 	ClassInfo[1][class_color] = 0xB1191C80;
 	ClassInfo[1][class_color_tag] = 'r';
+	ClassInfo[1][team_score] = 0;
 		
 	SetGameModeText("My first open.mp gamemode!");
 	UsePlayerPedAnims();
@@ -399,7 +402,7 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 		if(PlayerInfo[playerid][is_carrying_bomb] && CPInfo[bombcpid][is_active] == false) {
 			CPInfo[bombcpid][cp_player] = playerid;
 			CPInfo[bombcpid][cp_team] = GetPlayerTeam(playerid);
-			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4.1, false, false, false, true, 2670, 1);
+			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4, false, false, false, 0, 2670, 1);
 			new Float:pX, Float:pY, Float:pZ;
 			for(new i = 0; i < MAX_PLAYERS; i++)
 			{
@@ -419,7 +422,7 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 		if(CPInfo[bombcpid][cp_team] != GetPlayerTeam(playerid) && CPInfo[bombcpid][is_active])
 		{
 			CPInfo[bombcpid][cp_player] = playerid;
-			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4.1, false, false, false, true, 2670, 1);
+			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4, false, false, false, 0, 2670, 1);
 			SendClientMessage(playerid, PASTEL_CORAL_DARK, "You started defusing the bomb!");
 			CPInfo[bombcpid][cp_defuse_timer] = SetTimerEx("DefusePickupBomb", 10*1000, false, "ii", bombcpid, playerid);
 		}

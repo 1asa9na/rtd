@@ -64,3 +64,4 @@
 #define DLG_REG             1002
 #define DLG_LOG             1003
 #define DLG_REGEMAIL        1004
+#define DLG_STATS           1005
