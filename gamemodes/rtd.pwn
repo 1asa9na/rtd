@@ -28,20 +28,20 @@ main() {}
 
 public OnGameModeInit()
 {
-	ClassInfo[0][x] = 1446.9613;
-	ClassInfo[0][y] = 349.7412;
-	ClassInfo[0][z] = 18.8417;
-	ClassInfo[0][a] = 117.9194;
+	ClassInfo[0][class_x] = 1446.9613;
+	ClassInfo[0][class_y] = 349.7412;
+	ClassInfo[0][class_z] = 18.8417;
+	ClassInfo[0][class_a] = 117.9194;
 	strins(ClassInfo[0][title], "BLYADS", 0);
 	ClassInfo[0][skin] = 29;
 	ClassInfo[0][class_color] = 0xE5BD6080;
 	ClassInfo[0][class_color_tag] = 'y';
 	ClassInfo[0][team_score] = 0;
 	
-	ClassInfo[1][x] = 1238.5229;
-	ClassInfo[1][y] = 213.6815;
-	ClassInfo[1][z] = 19.5547;
-	ClassInfo[1][a] = 115.0993;
+	ClassInfo[1][class_x] = 1238.5229;
+	ClassInfo[1][class_y] = 213.6815;
+	ClassInfo[1][class_z] = 19.5547;
+	ClassInfo[1][class_a] = 115.0993;
 	strins(ClassInfo[1][title], "GRIBS", 0);
 	ClassInfo[1][skin] = 73;
 	ClassInfo[1][class_color] = 0xB1191C80;
@@ -59,10 +59,10 @@ public OnGameModeInit()
 		AddPlayerClassEx(
 			class,
 			ClassInfo[class][skin],
-			ClassInfo[class][x],
-			ClassInfo[class][y],
-			ClassInfo[class][z],
-			ClassInfo[class][a],
+			ClassInfo[class][class_x],
+			ClassInfo[class][class_y],
+			ClassInfo[class][class_z],
+			ClassInfo[class][class_a],
 			0, 1,
 			0, 1,
 			0, 1
@@ -225,6 +225,7 @@ public OnPlayerUpdate(playerid)
 		GivePlayerMoney(playerid, delta_money);
 	}
 	if(GetPlayerScore(playerid) != ORM_players[playerid][orm_players_score]) SetPlayerScore(playerid, ORM_players[playerid][orm_players_score]);
+	return 1;
 }
 
 public OnPlayerRequestClass(playerid, classid)
@@ -238,29 +239,29 @@ public OnPlayerRequestClass(playerid, classid)
 	PlayerTextDrawFont(playerid, class_textdraw, 2);
 	PlayerTextDrawShow(playerid, class_textdraw);
 	PlayerInfo[playerid][current_textdraw] = class_textdraw;
-	SetPlayerPos(playerid, ClassInfo[classid][x],	ClassInfo[classid][y],	ClassInfo[classid][z]);
-	SetPlayerFacingAngle(playerid, ClassInfo[classid][a]);
-	SetPlayerCameraPos(playerid, ClassInfo[classid][x] - 4 * floatcos(117.9194 - 90.0, degrees), ClassInfo[classid][y] - 4 * floatsin(117.9194 - 90.0, degrees), ClassInfo[classid][z] + 1);
-	SetPlayerCameraLookAt(playerid, ClassInfo[classid][x],	ClassInfo[classid][y],	ClassInfo[classid][z]);
+	SetPlayerPos(playerid, ClassInfo[classid][class_x],	ClassInfo[classid][class_y],	ClassInfo[classid][class_z]);
+	SetPlayerFacingAngle(playerid, ClassInfo[classid][class_a]);
+	SetPlayerCameraPos(playerid, ClassInfo[classid][class_x] - 4 * floatcos(117.9194 - 90.0, degrees), ClassInfo[classid][class_y] - 4 * floatsin(117.9194 - 90.0, degrees), ClassInfo[classid][class_z] + 1);
+	SetPlayerCameraLookAt(playerid, ClassInfo[classid][class_x],	ClassInfo[classid][class_y],	ClassInfo[classid][class_z]);
 	InterpolateCameraPos(
 		playerid,
-		ClassInfo[(classid - 1) % N_CLASSES][x] - 4 * floatcos(117.9194 - 90.0, degrees),
-		ClassInfo[(classid - 1) % N_CLASSES][y] - 4 * floatsin(117.9194 - 90.0, degrees),
-		ClassInfo[(classid - 1) % N_CLASSES][z] + 1,
-		ClassInfo[classid][x] - 4 * floatcos(117.9194 - 90.0, degrees),
-		ClassInfo[classid][y] - 4 * floatsin(117.9194 - 90.0, degrees),
-		ClassInfo[classid][z] + 1,
+		ClassInfo[(classid - 1) % N_CLASSES][class_x] - 4 * floatcos(117.9194 - 90.0, degrees),
+		ClassInfo[(classid - 1) % N_CLASSES][class_y] - 4 * floatsin(117.9194 - 90.0, degrees),
+		ClassInfo[(classid - 1) % N_CLASSES][class_z] + 1,
+		ClassInfo[classid][class_x] - 4 * floatcos(117.9194 - 90.0, degrees),
+		ClassInfo[classid][class_y] - 4 * floatsin(117.9194 - 90.0, degrees),
+		ClassInfo[classid][class_z] + 1,
 		1000,
 		CAMERA_MOVE
 	);
 	InterpolateCameraLookAt(
 		playerid,
-		ClassInfo[(classid - 1) % N_CLASSES][x],
-		ClassInfo[(classid - 1) % N_CLASSES][y],
-		ClassInfo[(classid - 1) % N_CLASSES][z],
-		ClassInfo[classid][x],
-		ClassInfo[classid][y],
-		ClassInfo[classid][z],
+		ClassInfo[(classid - 1) % N_CLASSES][class_x],
+		ClassInfo[(classid - 1) % N_CLASSES][class_y],
+		ClassInfo[(classid - 1) % N_CLASSES][class_z],
+		ClassInfo[classid][class_x],
+		ClassInfo[classid][class_y],
+		ClassInfo[classid][class_z],
 		1000,
 		CAMERA_MOVE
 	);
@@ -296,14 +297,12 @@ public OnPlayerSpawn(playerid)
 	return 1;
 }
 
-DEFINE_HOOK_RETURN__(OnCharacterSpawn, 0);
-
 forward OnCharacterSpawn(playerid);
 public OnCharacterSpawn(playerid)
 {
 	if(PlayerInfo[playerid][player_perk] != -1)
 	{
-		for(new i = 0; i < 3; i++) GivePlayerWeapon(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_weapons][i], PerkInfo[PlayerInfo[playerid][player_perk]][perk_weapon_ammo][i]);
+		for(new i = 0; i < MAX_PERK_WEAPONS; i++) GivePlayerWeapon(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_weapons][i], PerkInfo[PlayerInfo[playerid][player_perk]][perk_weapon_ammo][i]);
 		SetPlayerHealth(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_health]);
 		SetPlayerArmour(playerid, PerkInfo[PlayerInfo[playerid][player_perk]][perk_armour]);
 	}
@@ -347,7 +346,7 @@ stock ForcePerkSelection(playerid)
 		strcat(string, "\n");
 		strcat(string, PerkInfo[i][perk_title]);
 	}
-	ShowPlayerDialog(playerid, 1001, DIALOG_STYLE_LIST, "Perk Selection", string, "Continue", "Back");
+	ShowPlayerDialog(playerid, DLG_PERKS, DIALOG_STYLE_LIST, "Perk Selection", string, "Continue", "Back");
 }
 
 public OnPlayerRequestSpawn(playerid)
@@ -404,7 +403,7 @@ public OnPlayerEnterDynamicCP(playerid, checkpointid)
 			CPInfo[bombcpid][cp_team] = GetPlayerTeam(playerid);
 			ApplyAnimation(playerid, "BOMBER", "BOM_Plant", 4, false, false, false, 0, 2670, 1);
 			new Float:pX, Float:pY, Float:pZ;
-			for(new i = 0; i < MAX_PLAYERS; i++)
+			foreach(new i : Player)
 			{
 				if(IsPlayerConnected(playerid) && GetPlayerTeam(i) != GetPlayerTeam(playerid))
 				{
@@ -459,7 +458,7 @@ public DestroyPickupBomb(checkpointid, playerid)
 	CPInfo[checkpointid][cp_team] = -1;
 	PickupInfo[0][is_picked_up] = false;
 	PickupInfo[0][picked_up_by_team] = -1;
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(new i : Player)
 	{
 		if(IsPlayerConnected(i) && GetPlayerTeam(i) == GetPlayerTeam(playerid))
 		{
@@ -483,9 +482,9 @@ public DefusePickupBomb(checkpointid, playerid)
 	PickupInfo[0][is_picked_up] = false;
 	PickupInfo[0][picked_up_by_team] = -1;
 	PlayerInfo[playerid][is_carrying_bomb] = false;
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(new i : Player)
 	{
-		if(IsPlayerConnected(i) && GetPlayerTeam(i) == GetPlayerTeam(playerid))
+		if(GetPlayerTeam(i) == GetPlayerTeam(playerid))
 		{
 			ORM_players[playerid][orm_players_money] += 10000;
 			ORM_players[playerid][orm_players_score] += 15;

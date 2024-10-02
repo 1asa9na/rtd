@@ -25,16 +25,13 @@ stock GetPlayerLastDamager(playerid, &issuerid, &weapon)
 stock CreateCustomExplosion(playerid, Float:fX, Float:fY, Float:fZ, type, Float:radius)
 {
 	CreateExplosion(fX, fY, fZ, type, radius);
-	for(new i = 0; i < MAX_PLAYERS; i++)
+	foreach(new i : Player)
 	{
-		if(IsPlayerConnected(i))
-		{
-			new Float:pX, Float:pY, Float:pZ;
-			GetPlayerPos(i, pX, pY, pZ);
-			
-			new Float:length = floatsqroot(floatpower(pX - fX, 2) + floatpower(pY - fY, 2) + floatpower(pZ - fZ, 2));
-			if(length < radius) SetPlayerLastDamager(i, playerid, 51);
-		}
+		new Float:pX, Float:pY, Float:pZ;
+		GetPlayerPos(i, pX, pY, pZ);
+		
+		new Float:length = floatsqroot(floatpower(pX - fX, 2) + floatpower(pY - fY, 2) + floatpower(pZ - fZ, 2));
+		if(length < radius) SetPlayerLastDamager(i, playerid, 51);
 	}
 }
 
@@ -70,7 +67,7 @@ stock OnPlayerKillMsg(killerid, playerid, money, score)
 	format(accentcolor, 7, "%x", PASTEL_TEAL_LIGHT);
 
 	new normalcolor[7];
-	format(accentcolor, 7, "%x", PASTEL_PEACH_LIGHT);
+	format(normalcolor, 7, "%x", PASTEL_PEACH_LIGHT);
 
 	new string[74 - 20 + MAX_PLAYER_NAME + 42 + 1 + 3];
 	format(string, sizeof(string), "{%s}You killed {%s}%s, {%s}recieved {%s}%d$ {%s}cash and {%s}%d {%s}score", normalcolor, playercolor, ORM_players[playerid][orm_players_name], normalcolor, accentcolor, money, normalcolor, accentcolor, score, normalcolor);
@@ -96,7 +93,7 @@ hook OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, 
 				Float:vX, Float:vY, Float:vZ,
 				Float:angular_velocity = 1,
 				Float:linear_velocity = 1,
-				Float:player_velocity = 10;
+				Float:player_velocity = 5;
 			switch(hittype) {
 				case BULLET_HIT_TYPE_PLAYER: {
 					GetPlayerPos(playerid, oX, oY, oZ);
@@ -106,7 +103,7 @@ hook OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, 
 					nX = (hX - oX) / dist;
 					nY = (hY - oY) / dist;
 					nZ = (hZ - oZ) / dist;
-					SetPlayerVelocity(hitid, vX + nX * player_velocity, vY + nY * player_velocity, vZ + floatabs(nZ * player_velocity));
+					SetPlayerVelocity(hitid, vX + nX * player_velocity, vY + nY * player_velocity, vZ + floatabs(nZ * player_velocity) + 0.1);
 					SetPlayerLastDamager(hitid, playerid, WEAPON_DEAGLE);
 				}
 				case BULLET_HIT_TYPE_VEHICLE: {
@@ -139,7 +136,7 @@ hook OnPlayerWeaponShot(playerid, weaponid, hittype, hitid, Float:fX, Float:fY, 
 
 stock IsVehicleOccupied(vehicleid)
 {
-	for(new i = 0; i < MAX_PLAYERS; i++) {
+	foreach(new i : Player) {
 		if(IsPlayerInVehicle(i, vehicleid))
 		{
 			return i;
@@ -154,18 +151,20 @@ stock RemovePlayerDrunk(hitid)
 	SetPlayerDrunkLevel(hitid, 0);
 }
 
-hook OnPlayerGiveDamage(playerid, damagedid, Float:amount, weaponid, bodypart)
-{
-	new Float:pX, Float:pY, Float:pZ;
-	GetPlayerPos(playerid, pX, pY, pZ);
-	PlayerPlaySound(playerid, 17802, Float:pX, Float:pY, Float:pZ);
-}
-
 hook OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
 {
 	new Float:pX, Float:pY, Float:pZ;
 	GetPlayerPos(playerid, pX, pY, pZ);
 	PlayerPlaySound(playerid, 4600, Float:pX, Float:pY, Float:pZ);
+
+	new Float:iX, Float:iY, Float:iZ;
+	GetPlayerPos(issuerid, iX, iY, iZ);
+	PlayerPlaySound(issuerid, 17802, Float:iX, Float:iY, Float:iZ);
+
+	if(PlayerInfo[issuerid][player_perk] == 1 && bodypart == BODY_PART_HEAD)
+	{
+		amount = 200;
+	}
 }
 
 hook OnGameModeInit()

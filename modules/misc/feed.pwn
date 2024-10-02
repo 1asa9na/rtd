@@ -146,9 +146,9 @@ stock TeamMateWonMsg(teamid, money, score)
     new string[79 - 14 + 30 + 5 + 2];
     format(string, sizeof(string), "{%s}Your team won this period, recieved {%s}%d${%s} cash and {%s}%d{%s} score!", normalcolor, accentcolor, money, normalcolor, accentcolor, score, normalcolor);
 
-    for(new i = 0; i < MAX_PLAYERS; i++)
+    foreach(new i : Player)
     {
-        if(IsPlayerConnected(i) && GetPlayerTeam(i) == teamid)
+        if(GetPlayerTeam(i) == teamid)
         {
             SendClientMessage(i, -1, string);
             ORM_players[i][orm_players_money] += money;
@@ -179,7 +179,7 @@ stock UpdateFeedText()
     for(new i = 0; i < N_FEED_MSG; i ++)
     {
         TextDrawSetString(FeedMsgs[i][feed_msg_textdraw], FeedMsgs[i][feed_msg]);
-        for(new j = 0; j < MAX_PLAYERS; j++) TextDrawShowForPlayer(j, FeedMsgs[i][feed_msg_textdraw]);
+        foreach(new j : Player) TextDrawShowForPlayer(j, FeedMsgs[i][feed_msg_textdraw]);
     }
 }
 

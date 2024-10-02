@@ -214,7 +214,7 @@ hook OnPlayerLeaveDynamicArea(playerid, areaid)
 		SkillRookTowerInfo[issuerid][srt_timerid] = -1;
 		SkillRookTowerInfo[issuerid][srt_targetid] = INVALID_PLAYER_ID;
 
-		for(new i = 0; i < MAX_PLAYERS; i++)
+		foreach(new i : Player)
 		{
 			if(IsPlayerInDynamicArea(i, areaid) && GetPlayerTeam(i) != GetPlayerTeam(issuerid))
 			{

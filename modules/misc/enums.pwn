@@ -7,6 +7,7 @@
 #define N_BOMB_CPS 2
 #define N_PERKS 4
 #define MAX_PERK_NAME 10
+#define MAX_PERK_WEAPONS 3
 
 #define MAX_KING_CHARGES 10
 #define SKILL_ROOK_TOWERS_EX_ID_OFFSET 400001
@@ -18,10 +19,10 @@
 // CLASS INFO
 
 enum EClassInfo {
-	Float:x,
-	Float:y,
-	Float:z,
-	Float:a,
+	Float:class_x,
+	Float:class_y,
+	Float:class_z,
+	Float:class_a,
 	title[MAX_CLASS_NAME],
 	skin,
 	class_color,
@@ -72,8 +73,8 @@ new SkillRookTowerInfo[MAX_PLAYERS][ESkillRookTowerInfo];
 enum EPerkInfo {
 	perk_health,
 	perk_armour,
-	perk_weapons[3],
-	perk_weapon_ammo[3],
+	perk_weapons[MAX_PERK_WEAPONS],
+	perk_weapon_ammo[MAX_PERK_WEAPONS],
 	perk_title[MAX_PERK_NAME]
 }
 

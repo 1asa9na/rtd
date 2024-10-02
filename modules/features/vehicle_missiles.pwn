@@ -1,4 +1,5 @@
 #include <YSI_Coding\y_hooks>
+#include <YSI_Data\y_iterate>
 
 #define MAX_MISSILES 10
 #define MISSILE_EX_ID_OFFSET 300001
@@ -323,7 +324,6 @@ hook OnPlayerKeyStateChange(playerid, newkeys, oldkeys)
 						new missileid = LaunchPlayerMissile(playerid, playerid, 3);
 						if(missileid == -1) return 1;
 						AttachCameraToDynamicObject(playerid, WMInfo[missileid][wm_objectid]);
-						MissileCooldown[playerid] = MISSILE_COOLDOWN;
 					}
 					MissileCoolDownMessage(playerid);
 				} else
@@ -365,7 +365,7 @@ hook OnPlayerClickPlayer(playerid, clickedplayerid, source)
 
 hook SecondUpdate()
 {
-	for(new i = 0; i < MAX_PLAYERS; i++) if(IsPlayerConnected(i) && MissileCooldown[i] > 0) MissileCooldown[i]--;
+	foreach(new i : Player) if(MissileCooldown[i] > 0) MissileCooldown[i]--;
 }
 
 stock MissileCoolDownMessage(playerid)
@@ -402,7 +402,7 @@ stock LaunchPlayerMissile(playerid, victimid, type) {
 		SendClientMessage(playerid, PASTEL_CORAL_DARK, "Missiles overflow!");
 		return -1;
 	}
-	new objectid = CreateDynamicObject(345, oX, oY, oZ, 0, 0, 0);
+	new objectid = CreateDynamicObject(345, oX, oY, oZ + 2, 0, 0, 0);
 	
 	Streamer_SetIntData(STREAMER_TYPE_OBJECT, objectid, E_STREAMER_EXTRA_ID, missileid + MISSILE_EX_ID_OFFSET);
 	
